@@ -126,6 +126,24 @@ function getNewEntries() {
         var timestamp = item.timestamp;
         var date = new Date(timestamp);
 
+        var bodyfat = null;
+        if (item.body_fat != null)
+          bodyfat = item.body_fat.toLocaleString({
+            style: "percent"
+          });
+
+        var musclemass = null;
+        if (item.muscle_mass != null)
+          musclemass = item.muscle_mass.toLocaleString({
+            style: "percent"
+          });
+
+        var water = null;
+        if (item.water != null)
+          water = item.water.toLocaleString({
+            style: "percent"
+          });
+
         // add the entry to the chart
         if (item.weight != null)
           weightchartdata.push([
@@ -135,8 +153,7 @@ function getNewEntries() {
 
         if (item.body_fat != null)
           bodyfatchartdata.push([
-            timestamp,
-            item.body_fat
+            timestamp, +(Math.round(item.body_fat + "e+2") + "e-2")
           ]);
 
         if (item.muscle_mass != null)
@@ -161,13 +178,13 @@ function getNewEntries() {
               .text(item.weight)
             )
             .append($('<td>')
-              .text(item.body_fat)
+              .text(bodyfat + '%')
             )
             .append($('<td>')
-              .text(item.water)
+              .text(water + '%')
             )
             .append($('<td>')
-              .text(item.muscle_mass)
+              .text(musclemass + '%')
             )
             .append($('<td>')
               .text(item.type)
@@ -216,6 +233,7 @@ function getNewEntries() {
         },
         series: [{
           type: 'line',
+          name: 'Weight',
           data: weightchartdata
         }]
       });
@@ -237,6 +255,7 @@ function getNewEntries() {
         },
         series: [{
           type: 'line',
+          name: 'Body Fat',
           data: bodyfatchartdata
         }]
       });
@@ -258,6 +277,7 @@ function getNewEntries() {
         },
         series: [{
           type: 'line',
+          name: 'Muscle Mass',
           data: musclechartdata
         }]
       });
@@ -279,6 +299,7 @@ function getNewEntries() {
         },
         series: [{
           type: 'line',
+          name: 'Water',
           data: waterchartdata
         }]
       });
