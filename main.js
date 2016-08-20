@@ -20,23 +20,6 @@ $("#signinform").submit(function(event) {
   signin();
 });
 
-$("#signoutbutton").click(function() {
-  entries = [];
-  weightchartdata = [];
-  bodyfatchartdata = [];
-  musclechartdata = [];
-  waterchartdata = [];
-
-  $("#signinform").show();
-  $("#navbar-links").hide();
-  $("#navbar-right").hide();
-  $("#datacontainer").hide();
-});
-
-$("#getNewEntriesButton").click(function() {
-  getNewEntries();
-});
-
 function signin() {
   var email = $("#email").val();
   var password = $("#password").val();
@@ -59,21 +42,8 @@ function signin() {
     .done(function(data) {
       authtoken = data.auth_token;
       $("#signinform").hide();
-      getNewEntries();
+      getEntries();
     });
-}
-
-function compareEntriesByTimestampDesc(a, b) {
-  var at = 0;
-  var bt = 0;
-
-  if (a != null && a.timestamp != null)
-    at = a.timestamp;
-
-  if (b != null && b.timestamp != null)
-    bt = b.timestamp;
-
-  return bt - at;
 }
 
 function compareEntriesByTimestampAsc(a, b) {
@@ -89,6 +59,19 @@ function compareEntriesByTimestampAsc(a, b) {
   return at - bt;
 }
 
+function compareEntriesByTimestampDesc(a, b) {
+  var at = 0;
+  var bt = 0;
+
+  if (a != null && a.timestamp != null)
+    at = a.timestamp;
+
+  if (b != null && b.timestamp != null)
+    bt = b.timestamp;
+
+  return bt - at;
+}
+
 function removeEntry(array, item) {
   // find the entry in the array
   var entry = array.find(function(element, index, array) {
@@ -102,13 +85,8 @@ function removeEntry(array, item) {
   }
 }
 
-function getNewEntries() {
-  $("#table > tbody").empty();
-
+function getEntries() {
   var start = 1000000000000;
-
-  // if (entries.length > 0)
-  //   start = entries[0].timestamp + 1000;
 
   var formData = {
     auth_token: authtoken,
@@ -130,7 +108,7 @@ function getNewEntries() {
       musclechartdata = [];
       waterchartdata = [];
 
-      // sort the entries newest to oldes
+      // sort the entries from oldest to newest (required by highcharts)
       entries.sort(compareEntriesByTimestampAsc);
 
       entries.forEach(function(item, index) {
@@ -228,7 +206,7 @@ function getNewEntries() {
       });
 
       // load the charts
-      $('#weightchart').highcharts({
+      $('#weight').highcharts({
         title: {
           text: 'Weight'
         },
@@ -250,7 +228,7 @@ function getNewEntries() {
         }]
       });
 
-      $('#bodyfatchart').highcharts({
+      $('#bodyfat').highcharts({
         title: {
           text: 'Fat'
         },
@@ -272,7 +250,7 @@ function getNewEntries() {
         }]
       });
 
-      $('#musclechart').highcharts({
+      $('#musclemass').highcharts({
         title: {
           text: 'Muscle Mass'
         },
@@ -294,7 +272,7 @@ function getNewEntries() {
         }]
       });
 
-      $('#waterchart').highcharts({
+      $('#water').highcharts({
         title: {
           text: 'Water'
         },
