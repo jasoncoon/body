@@ -1,3 +1,9 @@
+var shiftWindow = function() {
+  scrollBy(0, -50)
+};
+if (location.hash) shiftWindow();
+window.addEventListener("hashchange", shiftWindow);
+
 var authtoken;
 
 var entries = [];
@@ -22,14 +28,9 @@ $("#signoutbutton").click(function() {
   waterchartdata = [];
 
   $("#signinform").show();
-
-  // hide the controls
-  $("#toolbar").hide();
-  $("#tablecontainer").hide();
-  $("#weightchart").hide();
-  $("#bodyfatchart").hide();
-  $("#musclechart").hide();
-  $("#waterchart").hide();
+  $("#navbar-links").hide();
+  $("#navbar-right").hide();
+  $("#datacontainer").hide();
 });
 
 $("#getNewEntriesButton").click(function() {
@@ -75,6 +76,19 @@ function compareEntriesByTimestampDesc(a, b) {
   return bt - at;
 }
 
+function compareEntriesByTimestampAsc(a, b) {
+  var at = 0;
+  var bt = 0;
+
+  if (a != null && a.timestamp != null)
+    at = a.timestamp;
+
+  if (b != null && b.timestamp != null)
+    bt = b.timestamp;
+
+  return at - bt;
+}
+
 function removeEntry(array, item) {
   // find the entry in the array
   var entry = array.find(function(element, index, array) {
@@ -117,7 +131,7 @@ function getNewEntries() {
       waterchartdata = [];
 
       // sort the entries newest to oldes
-      entries.sort(compareEntriesByTimestampDesc);
+      entries.sort(compareEntriesByTimestampAsc);
 
       entries.forEach(function(item, index) {
         if (item.op != "create")
@@ -158,14 +172,12 @@ function getNewEntries() {
 
         if (item.muscle_mass != null)
           musclechartdata.push([
-            timestamp,
-            item.muscle_mass
+            timestamp, +(Math.round(item.muscle_mass + "e+2") + "e-2")
           ]);
 
         if (item.water != null)
           waterchartdata.push([
-            timestamp,
-            item.water
+            timestamp, +(Math.round(item.water + "e+2") + "e-2")
           ]);
 
         // add the entry to the table
@@ -186,9 +198,6 @@ function getNewEntries() {
             .append($('<td>')
               .text(musclemass + '%')
             )
-            .append($('<td>')
-              .text(item.type)
-            )
           );
       });
 
@@ -208,12 +217,15 @@ function getNewEntries() {
       });
 
       // show the controls
-      $("#toolbar").show();
-      $("#tablecontainer").show();
-      $("#weightchart").show();
-      $("#bodyfatchart").show();
-      $("#musclechart").show();
-      $("#waterchart").show();
+      $("#datacontainer").show();
+      $("#navbar-links").show();
+      $("#navbar-right").show();
+
+      $("#table").tablesorter({
+        sortList: [
+          [0, 1]
+        ]
+      });
 
       // load the charts
       $('#weightchart').highcharts({
@@ -240,7 +252,7 @@ function getNewEntries() {
 
       $('#bodyfatchart').highcharts({
         title: {
-          text: 'Body Fat'
+          text: 'Fat'
         },
         xAxis: {
           type: 'datetime'
@@ -255,7 +267,7 @@ function getNewEntries() {
         },
         series: [{
           type: 'line',
-          name: 'Body Fat',
+          name: 'Fat',
           data: bodyfatchartdata
         }]
       });
@@ -277,7 +289,7 @@ function getNewEntries() {
         },
         series: [{
           type: 'line',
-          name: 'Muscle Mass',
+          name: 'Muscle',
           data: musclechartdata
         }]
       });
