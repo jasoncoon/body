@@ -85,6 +85,39 @@ function removeEntry(array, item) {
   }
 }
 
+function getChange(oldest, newest) {
+  var change = 0;
+  if (newest > oldest) {
+    change = newest - oldest;
+  } else if (oldest > newest) {
+    change = oldest - newest;
+  }
+  change = +(Math.round(change + "e+2") + "e-2");
+  return change;
+}
+
+function getChangeClass(oldest, newest) {
+  var changeclass = "";
+  if (newest > oldest) {
+    changeclass = "glyphicon glyphicon-chevron-up";
+  } else if (oldest > newest) {
+    changeclass = "glyphicon glyphicon-chevron-down";
+  }
+
+  return changeclass;
+}
+
+function getChangeColorClass(oldest, newest) {
+  var changeclass = "";
+  if (newest > oldest) {
+    changeclass = "text-danger";
+  } else if (oldest > newest) {
+    changeclass = "text-success";
+  }
+
+  return changeclass;
+}
+
 function getEntries() {
   var start = 1000000000000;
 
@@ -118,6 +151,10 @@ function getEntries() {
         var timestamp = item.timestamp;
         var date = new Date(timestamp);
 
+        item.body_fat = +(Math.round(item.body_fat + "e+2") + "e-2");
+        item.muscle_mass = +(Math.round(item.muscle_mass + "e+2") + "e-2");
+        item.water = +(Math.round(item.water + "e+2") + "e-2");
+
         var bodyfat = null;
         if (item.body_fat != null)
           bodyfat = item.body_fat.toLocaleString({
@@ -145,17 +182,17 @@ function getEntries() {
 
         if (item.body_fat != null)
           bodyfatchartdata.push([
-            timestamp, +(Math.round(item.body_fat + "e+2") + "e-2")
+            timestamp, item.body_fat
           ]);
 
         if (item.muscle_mass != null)
           musclechartdata.push([
-            timestamp, +(Math.round(item.muscle_mass + "e+2") + "e-2")
+            timestamp, item.muscle_mass
           ]);
 
         if (item.water != null)
           waterchartdata.push([
-            timestamp, +(Math.round(item.water + "e+2") + "e-2")
+            timestamp, item.water
           ]);
 
         // add the entry to the table
@@ -193,6 +230,37 @@ function getEntries() {
         removeEntry(musclechartdata, item);
         removeEntry(waterchartdata, item);
       });
+
+      var newestEntry = entries[entries.length - 1];
+      var oldestEntry = entries[0];
+
+      var spanclass = getChangeClass(oldestEntry.weight, newestEntry.weight);
+      var change = getChange(oldestEntry.weight, newestEntry.weight);
+      $("#currentweight").text(newestEntry.weight);
+      $("#weightchange").addClass(spanclass);
+      $("#weightchange").addClass(getChangeColorClass(oldestEntry.weight, newestEntry.weight));
+      $("#weightchange").text(change);
+
+      spanclass = getChangeClass(oldestEntry.body_fat, newestEntry.body_fat);
+      change = getChange(oldestEntry.body_fat, newestEntry.body_fat);
+      $("#currentbodyfat").text(newestEntry.body_fat);
+      $("#bodyfatchange").addClass(spanclass);
+      $("#bodyfatchange").addClass(getChangeColorClass(oldestEntry.body_fat, newestEntry.body_fat));
+      $("#bodyfatchange").text(change);
+
+      spanclass = getChangeClass(oldestEntry.muscle_mass, newestEntry.muscle_mass, true);
+      change = getChange(oldestEntry.muscle_mass, newestEntry.muscle_mass);
+      $("#currentmusclemass").text(newestEntry.muscle_mass);
+      $("#musclemasschange").addClass(spanclass);
+      $("#musclemasschange").addClass(getChangeColorClass(newestEntry.muscle_mass, oldestEntry.muscle_mass));
+      $("#musclemasschange").text(change);
+
+      spanclass = getChangeClass(oldestEntry.water, newestEntry.water, true);
+      change = getChange(oldestEntry.water, newestEntry.water);
+      $("#currentwater").text(newestEntry.water);
+      $("#waterchange").addClass(spanclass);
+      $("#waterchange").addClass(getChangeColorClass(newestEntry.water, oldestEntry.water));
+      $("#waterchange").text(change);
 
       // show the controls
       $("#datacontainer").show();
