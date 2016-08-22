@@ -97,6 +97,33 @@
             </tr>
           </tbody>
         </table>
+
+        <div class="panel-body">
+          <form id="bmiform" class="form-horizontal">
+            <div class="form-group">
+              <label for="feet" class="col-sm-2 control-label">Height</label>
+              <div class="col-sm-2">
+                <div class="input-group">
+                  <input type="number" class="form-control" id="feet" placeholder="Feet">
+                  <span class="input-group-addon">ft</span>
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="input-group">
+                  <input type="number" class="form-control" id="inches" placeholder="Inches">
+                  <span class="input-group-addon">in</span>
+                </div>
+              </div>
+              <label for="bmi" class="col-sm-1 control-label">BMI</label>
+              <div class="col-sm-2">
+                <p class="form-control-static" id="bmi"></p>
+              </div>
+              <div class="col-sm-2">
+                <button type="submit" class="btn btn-default">Calculate</button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
 
       <div id="weight" style="width:100%; height:400px;"></div>
@@ -126,8 +153,7 @@
               <th>Muscle</th>
             </tr>
           </thead>
-          <tbody>
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
     </div>

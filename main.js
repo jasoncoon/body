@@ -12,8 +12,31 @@ var bodyfatchartdata = [];
 var musclechartdata = [];
 var waterchartdata = [];
 
+var weight;
+
 $("#email").val(localStorage.getItem("email"));
 $("#password").val(localStorage.getItem("password"));
+
+$("#feet").val(localStorage.getItem("feet"));
+$("#inches").val(localStorage.getItem("inches"));
+
+$("#bmiform").submit(function(event) {
+  event.preventDefault();
+  calculateBmi();
+});
+
+function calculateBmi() {
+    var feet = parseInt($("#feet").val());
+    var inches = parseInt($("#inches").val());
+
+    localStorage.setItem("feet", feet.toString());
+    localStorage.setItem("inches", inches.toString());
+
+    var height = (feet * 12) + inches;
+    var bmi = 703 * (weight / (height * height));
+    bmi = +(Math.round(bmi + "e+2") + "e-2");
+    $("#bmi").html(bmi.toString() + " kg/m&#x00B2;");
+}
 
 $("#signinform").submit(function(event) {
   event.preventDefault();
@@ -123,6 +146,7 @@ function getEntries() {
     })
     .done(function(data) {
       loadEntries(data);
+      calculateBmi();
     });
 }
 
@@ -231,6 +255,8 @@ function loadEntries(data) {
 
   var newestEntry = entries[entries.length - 1];
   var oldestEntry = entries[0];
+
+  weight = newestEntry.weight;
 
   $("#startdate").text(new Date(oldestEntry.timestamp).toLocaleDateString());
   $("#enddate").text(new Date(newestEntry.timestamp).toLocaleDateString());
