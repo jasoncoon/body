@@ -61,67 +61,69 @@
       <div id="stats" class="panel panel-default">
         <div class="panel-heading">Stats</div>
 
-        <table class="table table-striped table-hover table-condensed">
-          <thead>
-            <tr>
-              <th></th>
-              <th id="startdate"></th>
-              <th id="enddate"></th>
-              <th>Change</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th class="text-right">Weight:</th>
-              <td id="startweight"></td>
-              <td id="endweight"></td>
-              <td><span id="weightchange"></span></td>
-            </tr>
-            <tr>
-              <th class="text-right">Body Fat:</th>
-              <td id="startbodyfat"></td>
-              <td id="endbodyfat"></td>
-              <td><span id="bodyfatchange"></span></td>
-            </tr>
-            <tr>
-              <th class="text-right">Muscle Mass:</th>
-              <td id="startmusclemass"></td>
-              <td id="endmusclemass"></td>
-              <td><span id="musclemasschange"></span></td>
-            </tr>
-            <tr>
-              <th class="text-right">Water:</th>
-              <td id="startwater"></td>
-              <td id="endwater"></td>
-              <td><span id="waterchange"></span></td>
-            </tr>
-          </tbody>
-        </table>
-
         <div class="panel-body">
-          <form id="bmiform" class="form-horizontal">
+          <table class="table table-striped table-hover table-condensed">
+            <thead>
+              <tr>
+                <th></th>
+                <th id="startdate"></th>
+                <th id="enddate"></th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th class="text-right">Weight:</th>
+                <td id="startweight"></td>
+                <td id="endweight"></td>
+                <td><span id="weightchange"></span></td>
+              </tr>
+              <tr>
+                <th class="text-right">Body Fat:</th>
+                <td id="startbodyfat"></td>
+                <td id="endbodyfat"></td>
+                <td><span id="bodyfatchange"></span></td>
+              </tr>
+              <tr>
+                <th class="text-right">Muscle Mass:</th>
+                <td id="startmusclemass"></td>
+                <td id="endmusclemass"></td>
+                <td><span id="musclemasschange"></span></td>
+              </tr>
+              <tr>
+                <th class="text-right">Water:</th>
+                <td id="startwater"></td>
+                <td id="endwater"></td>
+                <td><span id="waterchange"></span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <form class="form-horizontal">
             <div class="form-group">
-              <label for="feet" class="col-sm-2 control-label">Height</label>
+              <label for="height" class="col-sm-2 control-label">Height</label>
               <div class="col-sm-2">
-                <div class="input-group">
-                  <input type="number" class="form-control" id="feet" placeholder="Feet">
-                  <span class="input-group-addon">ft</span>
-                </div>
-              </div>
-              <div class="col-sm-2">
-                <div class="input-group">
-                  <input type="number" class="form-control" id="inches" placeholder="Inches">
-                  <span class="input-group-addon">in</span>
-                </div>
+                <p class="form-control-static" id="height"></p>
               </div>
               <label for="bmi" class="col-sm-1 control-label">BMI</label>
-              <div class="col-sm-2">
-                <p class="form-control-static" id="bmi"></p>
-              </div>
-              <div class="col-sm-2">
-                <button type="submit" class="btn btn-default">Calculate</button>
+              <div class="col-sm-4">
+                <p class="form-control-static">
+                  <span id="bmi"></span>
+                  <span id="bmicategory"></span>
+                </p>
               </div>
             </div>
+
+            <div class="form-group">
+              <label for="bodyfat" class="col-sm-2 control-label">Body Fat</label>
+              <div class="col-sm-4">
+                <p class="form-control-static">
+                  <span id="body_fat"></span>
+                  <span id="bodyfatcategory"></span>
+                </p>
+              </div>
+            </div>
+
           </form>
         </div>
       </div>
@@ -165,6 +167,7 @@
   <script src="jquery.tablesorter.min.js"></script>
   <script src="sha256.min.js"></script>
   <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="bmi.js"></script>
   <script src="main.js"></script>
 </body>
 

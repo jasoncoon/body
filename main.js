@@ -13,29 +13,34 @@ var musclechartdata = [];
 var waterchartdata = [];
 
 var weight;
+var bodyfat;
+
+var userdata;
 
 $("#email").val(localStorage.getItem("email"));
 $("#password").val(localStorage.getItem("password"));
 
-$("#feet").val(localStorage.getItem("feet"));
-$("#inches").val(localStorage.getItem("inches"));
-
-$("#bmiform").submit(function(event) {
-  event.preventDefault();
-  calculateBmi();
-});
-
 function calculateBmi() {
-    var feet = parseInt($("#feet").val());
-    var inches = parseInt($("#inches").val());
-
-    localStorage.setItem("feet", feet.toString());
-    localStorage.setItem("inches", inches.toString());
-
-    var height = (feet * 12) + inches;
+    var height = userdata.height;
+    $("#height").html(height.toString() + " inches");
     var bmi = 703 * (weight / (height * height));
     bmi = +(Math.round(bmi + "e+2") + "e-2");
+
+    var bmicategory = getBmiCategory(bmi);
+
     $("#bmi").html(bmi.toString() + " kg/m&#x00B2;");
+    $("#bmi").addClass(bmicategory.class);
+
+    $("#bmicategory").html(" - " + bmicategory.name + " (" + bmicategory.from + " - " + bmicategory.to + ")");
+    $("#bmicategory").addClass(bmicategory.class);
+
+    var bodyfatcategory = getBodyFatCategory(userdata.gender, bodyfat);
+
+    $("#body_fat").html(bodyfat.toString() + "%");
+    $("#body_fat").addClass(bodyfatcategory.class);
+
+    $("#bodyfatcategory").html(" - " + bodyfatcategory.name + " (" + bodyfatcategory.from + " - " + bodyfatcategory.to + ")");
+    $("#bodyfatcategory").addClass(bodyfatcategory.class);
 }
 
 $("#signinform").submit(function(event) {
@@ -63,6 +68,7 @@ function signin() {
       data: formData
     })
     .done(function(data) {
+      userdata = data;
       authtoken = data.auth_token;
       $("#signinform").hide();
       getEntries();
@@ -257,6 +263,7 @@ function loadEntries(data) {
   var oldestEntry = entries[0];
 
   weight = newestEntry.weight;
+  bodyfat = newestEntry.body_fat;
 
   $("#startdate").text(new Date(oldestEntry.timestamp).toLocaleDateString());
   $("#enddate").text(new Date(newestEntry.timestamp).toLocaleDateString());
