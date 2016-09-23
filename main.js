@@ -161,7 +161,7 @@ function removeEntries(data, entries) {
     if (item.op == "delete") {
       // find the entry in the array
       var entry = entries.find(function(element, index, array) {
-        return element[0] = item.timestamp;
+        return element.timestamp == item.timestamp;
       }, item);
 
       // remove the entry from the array
@@ -265,40 +265,40 @@ function loadEntries(data) {
   weight = newestEntry.weight;
   bodyfat = newestEntry.body_fat;
 
-  $("#startdate").text(new Date(oldestEntry.timestamp).toLocaleDateString());
-  $("#enddate").text(new Date(newestEntry.timestamp).toLocaleDateString());
+  $(".startdate").text(new Date(oldestEntry.timestamp).toLocaleDateString());
+  $(".enddate").text(new Date(newestEntry.timestamp).toLocaleDateString());
 
   var spanclass = getChangeClass(oldestEntry.weight, newestEntry.weight);
   var change = getChange(oldestEntry.weight, newestEntry.weight);
-  $("#startweight").text(oldestEntry.weight + " lbs");
-  $("#endweight").text(newestEntry.weight + " lbs");
-  $("#weightchange").addClass(spanclass);
-  $("#weightchange").addClass(getChangeColorClass(oldestEntry.weight, newestEntry.weight));
-  $("#weightchange").text(change + " lbs");
+  $(".startweight").text(oldestEntry.weight);
+  $(".endweight").text(newestEntry.weight);
+  $(".weightchange").addClass(spanclass);
+  $(".weightchange").addClass(getChangeColorClass(oldestEntry.weight, newestEntry.weight));
+  $(".weightchange").text(change);
 
   spanclass = getChangeClass(oldestEntry.body_fat, newestEntry.body_fat);
   change = getChange(oldestEntry.body_fat, newestEntry.body_fat);
-  $("#startbodyfat").text(oldestEntry.body_fat + "%");
-  $("#endbodyfat").text(newestEntry.body_fat + "%");
-  $("#bodyfatchange").addClass(spanclass);
-  $("#bodyfatchange").addClass(getChangeColorClass(oldestEntry.body_fat, newestEntry.body_fat));
-  $("#bodyfatchange").text(change + "%");
+  $(".startbodyfat").text(oldestEntry.body_fat + "%");
+  $(".endbodyfat").text(newestEntry.body_fat + "%");
+  $(".bodyfatchange").addClass(spanclass);
+  $(".bodyfatchange").addClass(getChangeColorClass(oldestEntry.body_fat, newestEntry.body_fat));
+  $(".bodyfatchange").text(change + "%");
 
   spanclass = getChangeClass(oldestEntry.muscle_mass, newestEntry.muscle_mass, true);
   change = getChange(oldestEntry.muscle_mass, newestEntry.muscle_mass);
-  $("#startmusclemass").text(oldestEntry.muscle_mass + "%");
-  $("#endmusclemass").text(newestEntry.muscle_mass + "%");
-  $("#musclemasschange").addClass(spanclass);
-  $("#musclemasschange").addClass(getChangeColorClass(newestEntry.muscle_mass, oldestEntry.muscle_mass));
-  $("#musclemasschange").text(change + "%");
+  $(".startmusclemass").text(oldestEntry.muscle_mass + "%");
+  $(".endmusclemass").text(newestEntry.muscle_mass + "%");
+  $(".musclemasschange").addClass(spanclass);
+  $(".musclemasschange").addClass(getChangeColorClass(newestEntry.muscle_mass, oldestEntry.muscle_mass));
+  $(".musclemasschange").text(change + "%");
 
   spanclass = getChangeClass(oldestEntry.water, newestEntry.water, true);
   change = getChange(oldestEntry.water, newestEntry.water);
-  $("#startwater").text(oldestEntry.water + "%");
-  $("#endwater").text(newestEntry.water + "%");
-  $("#waterchange").addClass(spanclass);
-  $("#waterchange").addClass(getChangeColorClass(newestEntry.water, oldestEntry.water));
-  $("#waterchange").text(change + "%");
+  $(".startwater").text(oldestEntry.water + "%");
+  $(".endwater").text(newestEntry.water + "%");
+  $(".waterchange").addClass(spanclass);
+  $(".waterchange").addClass(getChangeColorClass(newestEntry.water, oldestEntry.water));
+  $(".waterchange").text(change + "%");
 
   // show the controls
   $("#datacontainer").show();
@@ -336,7 +336,7 @@ function loadEntries(data) {
 
   $('#bodyfat').highcharts({
     title: {
-      text: 'Fat'
+      text: 'Body Fat'
     },
     xAxis: {
       type: 'datetime'
@@ -351,7 +351,7 @@ function loadEntries(data) {
     },
     series: [{
       type: 'line',
-      name: 'Fat',
+      name: 'Body Fat',
       data: bodyfatchartdata
     }]
   });
