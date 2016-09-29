@@ -1,4 +1,4 @@
-var shiftWindow = function() {
+var shiftWindow = function () {
   scrollBy(0, -50)
 };
 if (location.hash) shiftWindow();
@@ -6,7 +6,7 @@ window.addEventListener("hashchange", shiftWindow);
 
 var authtoken;
 
-var entries = [];
+var data = [];
 var weightchartdata = [];
 var bodyfatchartdata = [];
 var musclechartdata = [];
@@ -21,29 +21,29 @@ $("#email").val(localStorage.getItem("email"));
 $("#password").val(localStorage.getItem("password"));
 
 function calculateBmi() {
-    var height = userdata.height;
-    $("#height").html(height.toString() + " inches");
-    var bmi = 703 * (weight / (height * height));
-    bmi = +(Math.round(bmi + "e+2") + "e-2");
+  var height = userdata.height;
+  $("#height").html(height.toString() + " inches");
+  var bmi = 703 * (weight / (height * height));
+  bmi = +(Math.round(bmi + "e+2") + "e-2");
 
-    var bmicategory = getBmiCategory(bmi);
+  var bmicategory = getBmiCategory(bmi);
 
-    $("#bmi").html(bmi.toString() + " kg/m&#x00B2;");
-    $("#bmi").addClass(bmicategory.class);
+  $("#bmi").html(bmi.toString() + " kg/m&#x00B2;");
+  $("#bmi").addClass(bmicategory.class);
 
-    $("#bmicategory").html(" - " + bmicategory.name + " (" + bmicategory.from + " - " + bmicategory.to + ")");
-    $("#bmicategory").addClass(bmicategory.class);
+  $("#bmicategory").html(" - " + bmicategory.name + " (" + bmicategory.from + " - " + bmicategory.to + ")");
+  $("#bmicategory").addClass(bmicategory.class);
 
-    var bodyfatcategory = getBodyFatCategory(userdata.gender, bodyfat);
+  var bodyfatcategory = getBodyFatCategory(userdata.gender, bodyfat);
 
-    $("#body_fat").html(bodyfat.toString() + "%");
-    $("#body_fat").addClass(bodyfatcategory.class);
+  $("#body_fat").html(bodyfat.toString() + "%");
+  $("#body_fat").addClass(bodyfatcategory.class);
 
-    $("#bodyfatcategory").html(" - " + bodyfatcategory.name + " (" + bodyfatcategory.from + " - " + bodyfatcategory.to + ")");
-    $("#bodyfatcategory").addClass(bodyfatcategory.class);
+  $("#bodyfatcategory").html(" - " + bodyfatcategory.name + " (" + bodyfatcategory.from + " - " + bodyfatcategory.to + ")");
+  $("#bodyfatcategory").addClass(bodyfatcategory.class);
 }
 
-$("#signinform").submit(function(event) {
+$("#signinform").submit(function (event) {
   event.preventDefault();
   signin();
 });
@@ -60,14 +60,14 @@ function signin() {
   };
 
   $.ajax({
-      url: "https://api.weightgurus.com/v2/user/login",
-      type: "POST",
-      headers: {
-        Accept: "application/json"
-      },
-      data: formData
-    })
-    .done(function(data) {
+    url: "https://api.weightgurus.com/v2/user/login",
+    type: "POST",
+    headers: {
+      Accept: "application/json"
+    },
+    data: formData
+  })
+    .done(function (data) {
       userdata = data;
       authtoken = data.auth_token;
       $("#signinform").hide();
@@ -143,53 +143,58 @@ function getEntries() {
   };
 
   $.ajax({
-      url: "https://api.weightgurus.com/v2/entry/list",
-      type: "POST",
-      headers: {
-        Accept: "application/json"
-      },
-      data: formData
-    })
-    .done(function(data) {
+    url: "https://api.weightgurus.com/v2/entry/list",
+    type: "POST",
+    headers: {
+      Accept: "application/json"
+    },
+    data: formData
+  })
+    .done(function (data) {
       loadEntries(data);
       calculateBmi();
     });
 }
 
-function removeEntries(data, entries) {
-  data.forEach(function(item, index) {
+function markDeletedEntries(data) {
+  data.forEach(function (item, index) {
     if (item.op == "delete") {
       // find the entry in the array
-      var entry = entries.find(function(element, index, array) {
+      var entry = data.find(function (element, index, array) {
         return element.timestamp == item.timestamp;
       }, item);
 
       // remove the entry from the array
       if (entry != null) {
-        var entryIndex = entries.indexOf(entry);
-        entries.splice(entryIndex, 1);
+        entry.deleted = true;
       }
     }
 
     if (item.op == "delete" || item.body_fat == null || item.muscle_mass == null || item.water == null) {
-      var index = entries.indexOf(item);
-      entries.splice(index, 1);
+      item.deleted = true;
     }
   });
 }
 
 function loadEntries(data) {
-  entries = data.slice();
+  // sort the data from oldest to newest (required by highcharts)
+  data.sort(compareEntriesByTimestampAsc);
 
-  // sort the entries from oldest to newest (required by highcharts)
-  entries.sort(compareEntriesByTimestampAsc);
+  // flag any data that are marked for deletion
+  markDeletedEntries(data);
 
-  // remove any entries that are marked for deletion
-  removeEntries(data, entries);
+  var newestEntry;
+  var oldestEntry;
 
-  entries.forEach(function(item, index) {
-    if (item.op != "create")
+  data.forEach(function (item, index) {
+    if (item.op != "create" || item.deleted)
       return;
+
+    if (newestEntry == null || item.timestamp > newestEntry.timestamp)
+      newestEntry = item;
+
+    if (oldestEntry == null || item.timestamp < oldestEntry.timestamp)
+      oldestEntry = item;
 
     var timestamp = item.timestamp;
     var date = new Date(timestamp);
@@ -258,9 +263,6 @@ function loadEntries(data) {
         )
       );
   });
-
-  var newestEntry = entries[entries.length - 1];
-  var oldestEntry = entries[0];
 
   weight = newestEntry.weight;
   bodyfat = newestEntry.body_fat;
