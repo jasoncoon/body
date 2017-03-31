@@ -9,11 +9,37 @@ var bmiCategories = [
   { from: 40, to: 99, name: "Obese Class III (Very severely obese)", class: "text-danger" }
 ];
 
+function getBMI(height, weight) {
+  var bmi = 703 * (weight / (height * height));
+  
+  return +(Math.round(bmi + "e+2") + "e-2");
+}
+
+function getWeight(height, bmi) {
+  var weight = (bmi / 703) * (height * height);
+  return +(Math.round(weight + "e+2") + "e-2");
+}
+
 function getBmiCategory(bmi) {
   for(i = 0; i < bmiCategories.length; i++) {
     if(bmi <= bmiCategories[i].to)
       return bmiCategories[i];
   }
+}
+
+function getBmiCategoryIndex(bmi) {
+  for(i = 0; i < bmiCategories.length; i++) {
+    if(bmi <= bmiCategories[i].to)
+      return i;
+  }
+}
+
+function getCategoryDescription(category) {
+  return category.name  + " (" + category.from + " - " + category.to + ")"
+}
+
+function getCategoryElement(category) {
+  return "<span class='" + category.class + "'>" + getCategoryDescription(category) + "</span>";
 }
 
 var maleBodyFatCategories = [
@@ -41,4 +67,23 @@ function getBodyFatCategory(gender, bodyfat) {
     if(bodyfat <= array[i].to)
       return array[i];
   }
+}
+
+function getBodyFatCategoryIndex(gender, bodyfat) {
+  var array = maleBodyFatCategories;
+  if(gender != "Male")
+    array = femaleBodyFatCategories;
+
+  for(i = 0; i < array.length; i++) {
+    if(bodyfat <= array[i].to)
+      return i;
+  }
+}
+
+function getBodyFatCategoryByIndex(gender, index) {
+  var array = maleBodyFatCategories;
+  if(gender != "Male")
+    array = femaleBodyFatCategories;
+
+  return array[index];
 }
