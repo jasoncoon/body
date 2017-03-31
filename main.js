@@ -9,6 +9,7 @@ var authtoken;
 var data = [];
 var weightchartdata = [];
 var bodyfatchartdata = [];
+var bmichartdata = [];
 var musclechartdata = [];
 var waterchartdata = [];
 
@@ -23,24 +24,6 @@ $("#password").val(localStorage.getItem("password"));
 function calculateBmi() {
   var height = userdata.height;
   $("#height").html(height.toString() + " inches");
-  var bmi = 703 * (weight / (height * height));
-  bmi = +(Math.round(bmi + "e+2") + "e-2");
-
-  var bmicategory = getBmiCategory(bmi);
-
-  $("#bmi").html(bmi.toString() + " kg/m&#x00B2;");
-  $("#bmi").addClass(bmicategory.class);
-
-  $("#bmicategory").html(" - " + bmicategory.name + " (" + bmicategory.from + " - " + bmicategory.to + ")");
-  $("#bmicategory").addClass(bmicategory.class);
-
-  var bodyfatcategory = getBodyFatCategory(userdata.gender, bodyfat);
-
-  $("#body_fat").html(bodyfat.toString() + "%");
-  $("#body_fat").addClass(bodyfatcategory.class);
-
-  $("#bodyfatcategory").html(" - " + bodyfatcategory.name + " (" + bodyfatcategory.from + " - " + bodyfatcategory.to + ")");
-  $("#bodyfatcategory").addClass(bodyfatcategory.class);
 }
 
 $("#signinform").submit(function (event) {
@@ -186,6 +169,8 @@ function loadEntries(data) {
   var newestEntry;
   var oldestEntry;
 
+  var height = userdata.height;
+
   data.forEach(function (item, index) {
     if (item.op != "create" || item.deleted)
       return;
@@ -222,15 +207,23 @@ function loadEntries(data) {
       });
 
     // add the entry to the charts
-    if (item.weight != null)
+    if (item.weight != null) {
+      item.bmi = getBMI(height, item.weight);
+      
       weightchartdata.push([
         timestamp,
         item.weight
       ]);
+    }
 
     if (item.body_fat != null)
       bodyfatchartdata.push([
         timestamp, item.body_fat
+      ]);
+
+    if (item.bmi != null)
+      bmichartdata.push([
+        timestamp, item.bmi
       ]);
 
     if (item.muscle_mass != null)
@@ -256,6 +249,9 @@ function loadEntries(data) {
           .text(bodyfat + '%')
         )
         .append($('<td>')
+          .text(item.bmi)
+        )
+        .append($('<td>')
           .text(water + '%')
         )
         .append($('<td>')
@@ -267,24 +263,55 @@ function loadEntries(data) {
   weight = newestEntry.weight;
   bodyfat = newestEntry.body_fat;
 
-  $(".startdate").text(new Date(oldestEntry.timestamp).toLocaleDateString());
-  $(".enddate").text(new Date(newestEntry.timestamp).toLocaleDateString());
+  $(".startdate").text("Start: " + new Date(oldestEntry.timestamp).toLocaleDateString());
+  $(".enddate").text("Current: " + new Date(newestEntry.timestamp).toLocaleDateString());
 
+  var elapsed = newestEntry.timestamp - oldestEntry.timestamp;
+  var elapsedDays = elapsed / (1000 * 60 * 60 * 24);
+  elapsedDays = +(Math.round(elapsedDays + "e+2") + "e-2");
+  
   var spanclass = getChangeClass(oldestEntry.weight, newestEntry.weight);
-  var change = getChange(oldestEntry.weight, newestEntry.weight);
-  $(".startweight").text(oldestEntry.weight);
-  $(".endweight").text(newestEntry.weight);
+  var change = getChange(oldestEntry.weight, newestEntry.weight);  
+
+  var lostWeightPerDay = change / elapsedDays;
+  lostWeightPerDay = +(Math.round(lostWeightPerDay + "e+2") + "e-2");
+
+  $(".startweight").text(oldestEntry.weight + " lbs");
+  $(".endweight").text(newestEntry.weight + " lbs");
+  $("#weight").text(newestEntry.weight + " lbs, lost " + change + " lbs in " + elapsedDays + " days, or " + lostWeightPerDay + " lbs per day.");
   $(".weightchange").addClass(spanclass);
   $(".weightchange").addClass(getChangeColorClass(oldestEntry.weight, newestEntry.weight));
-  $(".weightchange").text(change);
+  $(".weightchange").text(change + " lbs");
 
+  var oldestBodyFatCategory = getBodyFatCategory(userdata.gender, oldestEntry.body_fat);
+  var newestBodyFatCategory = getBodyFatCategory(userdata.gender, newestEntry.body_fat);
+    
   spanclass = getChangeClass(oldestEntry.body_fat, newestEntry.body_fat);
   change = getChange(oldestEntry.body_fat, newestEntry.body_fat);
-  $(".startbodyfat").text(oldestEntry.body_fat + "%");
-  $(".endbodyfat").text(newestEntry.body_fat + "%");
+  $(".startbodyfat").text(oldestEntry.body_fat + "% - " + oldestBodyFatCategory.name + " (" + oldestBodyFatCategory.from + " - " + oldestBodyFatCategory.to + ")");
+  $(".endbodyfat").text(newestEntry.body_fat + "% - " + newestBodyFatCategory.name + " (" + newestBodyFatCategory.from + " - " + newestBodyFatCategory.to + ")");
+  $("#bodyfat").text(newestEntry.body_fat + "% - " + newestBodyFatCategory.name + " (" + newestBodyFatCategory.from + " - " + newestBodyFatCategory.to + ")");
+  $(".startbodyfat").addClass(oldestBodyFatCategory.class);
+  $(".endbodyfat").addClass(newestBodyFatCategory.class);
+  $("#bodyfat").addClass(newestBodyFatCategory.class);
   $(".bodyfatchange").addClass(spanclass);
   $(".bodyfatchange").addClass(getChangeColorClass(oldestEntry.body_fat, newestEntry.body_fat));
   $(".bodyfatchange").text(change + "%");
+
+  var oldestBmiCategory = getBmiCategory(oldestEntry.bmi);
+  var newestBmiCategory = getBmiCategory(newestEntry.bmi);
+
+  spanclass = getChangeClass(oldestEntry.bmi, newestEntry.bmi);
+  change = getChange(oldestEntry.bmi, newestEntry.bmi);
+  $(".startbmi").html(oldestEntry.bmi + " kg/m&#x00B2; - " + oldestBmiCategory.name + " (" + oldestBmiCategory.from + " - " + oldestBmiCategory.to + ")");
+  $(".endbmi").html(newestEntry.bmi + " kg/m&#x00B2; - " + newestBmiCategory.name + " (" + newestBmiCategory.from + " - " + newestBmiCategory.to + ")");
+  $("#bmi").html(newestEntry.bmi + " kg/m&#x00B2; - " + newestBmiCategory.name + " (" + newestBmiCategory.from + " - " + newestBmiCategory.to + ")");
+  $(".startbmi").addClass(oldestBmiCategory.class);
+  $(".endbmi").addClass(newestBmiCategory.class);
+  $("#bmi").addClass(newestBmiCategory.class);
+  $(".bmichange").addClass(spanclass);
+  $(".bmichange").addClass(getChangeColorClass(oldestEntry.bmi, newestEntry.bmi));
+  $(".bmichange").html(change + " kg/m&#x00B2;");
 
   spanclass = getChangeClass(oldestEntry.muscle_mass, newestEntry.muscle_mass, true);
   change = getChange(oldestEntry.muscle_mass, newestEntry.muscle_mass);
@@ -302,6 +329,43 @@ function loadEntries(data) {
   $(".waterchange").addClass(getChangeColorClass(newestEntry.water, oldestEntry.water));
   $(".waterchange").text(change + "%");
 
+  var bodyFatCategoryIndex = getBodyFatCategoryIndex(userdata.gender, newestEntry.body_fat);
+  if(bodyFatCategoryIndex > 0) {
+    nextBodyFatCategory = getBodyFatCategoryByIndex(userdata.gender, bodyFatCategoryIndex - 1);
+    
+    var bodyFatDifference = newestEntry.body_fat - nextBodyFatCategory.to;
+    bodyFatDifference = +(Math.round(bodyFatDifference + "e+2") + "e-2");
+    
+    var bodyFatWeight = (bodyFatDifference / 100) * newestEntry.weight;
+    bodyFatWeight = +(Math.round(bodyFatWeight + "e+2") + "e-2");
+    
+    $("#goalbodyfat").html("Lose " + bodyFatDifference + "% body fat (" + bodyFatWeight + " lbs) to " + nextBodyFatCategory.to + "% - " + getCategoryElement(nextBodyFatCategory));
+    var estimatedDays = bodyFatWeight / lostWeightPerDay;
+    estimatedDays = +(Math.round(estimatedDays + "e+2") + "e-2");
+    var estimatedDate = new Date(newestEntry.timestamp + estimatedDays * (1000 * 60 * 60 * 24)).toLocaleDateString();
+    $("#goalbodyfat").append("<br />Estimated " + estimatedDays + " days (" + estimatedDate + ") at average rate")
+  }
+
+  var bmiCategoryIndex = getBmiCategoryIndex(newestEntry.bmi);
+  if(bmiCategoryIndex > 0) {
+    nextBmiCategory = bmiCategories[bmiCategoryIndex - 1];
+    
+    var bmiDifference = newestEntry.bmi - nextBmiCategory.to;
+    bmiDifference = +(Math.round(bmiDifference + "e+2") + "e-2");
+    
+    var nextWeight = getWeight(userdata.height, nextBmiCategory.to);
+    nextWeight = +(Math.round(nextWeight + "e+2") + "e-2");
+    
+    var weightDifference = newestEntry.weight - nextWeight;
+    weightDifference = +(Math.round(weightDifference + "e+2") + "e-2");
+    
+    $("#goalbmi").html("Lose " + weightDifference + " lbs (" + bmiDifference + "kg/m&#x00B2;) to " + nextWeight + " lbs - " + getCategoryElement(nextBmiCategory));
+    var estimatedDays = weightDifference / lostWeightPerDay;
+    estimatedDays = +(Math.round(estimatedDays + "e+2") + "e-2");
+    var estimatedDate = new Date(newestEntry.timestamp + estimatedDays * (1000 * 60 * 60 * 24)).toLocaleDateString();
+    $("#goalbmi").append("<br />Estimated " + estimatedDays + " days (" + estimatedDate + ") at average rate")
+  }
+
   // show the controls
   $("#datacontainer").show();
   $("#navbar-links").show();
@@ -314,7 +378,7 @@ function loadEntries(data) {
   });
 
   // load the charts
-  $('#weight').highcharts({
+  $('#weightchart').highcharts({
     title: {
       text: 'Weight'
     },
@@ -329,6 +393,7 @@ function loadEntries(data) {
     legend: {
       enabled: false
     },
+    trendlines: { 0: {} },
     series: [{
       type: 'line',
       name: 'Weight',
@@ -336,7 +401,7 @@ function loadEntries(data) {
     }]
   });
 
-  $('#bodyfat').highcharts({
+  $('#bodyfatchart').highcharts({
     title: {
       text: 'Body Fat'
     },
@@ -351,6 +416,7 @@ function loadEntries(data) {
     legend: {
       enabled: false
     },
+    trendlines: { 0: {} },
     series: [{
       type: 'line',
       name: 'Body Fat',
@@ -358,7 +424,30 @@ function loadEntries(data) {
     }]
   });
 
-  $('#musclemass').highcharts({
+  $('#bmichart').highcharts({
+    title: {
+      text: 'BMI'
+    },
+    xAxis: {
+      type: 'datetime'
+    },
+    yAxis: {
+      title: {
+        text: 'kg/m²'
+      }
+    },
+    legend: {
+      enabled: false
+    },
+    trendlines: { 0: {} },
+    series: [{
+      type: 'line',
+      name: 'BMI',
+      data: bmichartdata
+    }]
+  });
+
+  $('#musclemasschart').highcharts({
     title: {
       text: 'Muscle Mass'
     },
@@ -373,6 +462,7 @@ function loadEntries(data) {
     legend: {
       enabled: false
     },
+    trendlines: { 0: {} },
     series: [{
       type: 'line',
       name: 'Muscle',
@@ -380,7 +470,7 @@ function loadEntries(data) {
     }]
   });
 
-  $('#water').highcharts({
+  $('#waterchart').highcharts({
     title: {
       text: 'Water'
     },
@@ -395,6 +485,7 @@ function loadEntries(data) {
     legend: {
       enabled: false
     },
+    trendlines: { 0: {} },
     series: [{
       type: 'line',
       name: 'Water',
