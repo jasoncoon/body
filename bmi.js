@@ -11,7 +11,7 @@ var bmiCategories = [
 
 function getBMI(height, weight) {
   var bmi = 703 * (weight / (height * height));
-  
+
   return +(Math.round(bmi + "e+2") + "e-2");
 }
 
@@ -22,14 +22,14 @@ function getWeight(height, bmi) {
 
 function getBmiCategory(bmi) {
   for(i = 0; i < bmiCategories.length; i++) {
-    if(bmi <= bmiCategories[i].to)
+    if(bmi < bmiCategories[i].to)
       return bmiCategories[i];
   }
 }
 
 function getBmiCategoryIndex(bmi) {
   for(i = 0; i < bmiCategories.length; i++) {
-    if(bmi <= bmiCategories[i].to)
+    if(bmi < bmiCategories[i].to)
       return i;
   }
 }
@@ -43,18 +43,18 @@ function getCategoryElement(category) {
 }
 
 var maleBodyFatCategories = [
-  { from: 2, to: 5, name: "Essential fat", class: "text-danger" },
-  { from: 6, to: 13, name: "Athletic", class: "text-success" },
-  { from: 14, to: 17, name: "Fit", class: "text-success" },
-  { from: 18, to: 24, name: "Average", class: "text-warning" },
+  { from: 2, to: 6, name: "Essential fat", class: "text-danger" },
+  { from: 6, to: 14, name: "Athletic", class: "text-success" },
+  { from: 14, to: 18, name: "Fit", class: "text-success" },
+  { from: 18, to: 25, name: "Average", class: "text-warning" },
   { from: 25, to: 100, name: "Obese", class: "text-danger" },
 ];
 
 var femaleBodyFatCategories = [
-  { from: 10, to: 13, name: "Essential fat", class: "text-danger" },
-  { from: 14, to: 20, name: "Athletic", class: "text-success" },
-  { from: 21, to: 24, name: "Fit", class: "text-success" },
-  { from: 25, to: 31, name: "Average", class: "text-warning" },
+  { from: 10, to: 14, name: "Essential fat", class: "text-danger" },
+  { from: 14, to: 21, name: "Athletic", class: "text-success" },
+  { from: 21, to: 25, name: "Fit", class: "text-success" },
+  { from: 25, to: 32, name: "Average", class: "text-warning" },
   { from: 32, to: 100, name: "Obese", class: "text-danger" },
 ];
 
@@ -64,7 +64,7 @@ function getBodyFatCategory(gender, bodyfat) {
     array = femaleBodyFatCategories;
 
   for(i = 0; i < array.length; i++) {
-    if(bodyfat <= array[i].to)
+    if(bodyfat < array[i].to)
       return array[i];
   }
 }
@@ -75,7 +75,7 @@ function getBodyFatCategoryIndex(gender, bodyfat) {
     array = femaleBodyFatCategories;
 
   for(i = 0; i < array.length; i++) {
-    if(bodyfat <= array[i].to)
+    if(bodyfat < array[i].to)
       return i;
   }
 }

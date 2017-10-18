@@ -18,8 +18,11 @@ var bodyfat;
 
 var userdata;
 
+var showDeleted = false;
+
 $("#email").val(localStorage.getItem("email"));
 $("#password").val(localStorage.getItem("password"));
+$("#showDeleted").prop("checked", localStorage.getItem("showDeleted") == "true");
 
 function calculateBmi() {
   var height = userdata.height;
@@ -34,8 +37,10 @@ $("#signinform").submit(function (event) {
 function signin() {
   var email = $("#email").val();
   var password = $("#password").val();
+  showDeleted = $("#showDeleted").prop("checked");
   localStorage.setItem("email", email);
   localStorage.setItem("password", password);
+  localStorage.setItem("showDeleted", showDeleted);
   password = sha256(password);
   var formData = {
     email: email,
@@ -133,10 +138,10 @@ function getEntries() {
     },
     data: formData
   })
-    .done(function (data) {
-      loadEntries(data);
-      calculateBmi();
-    });
+  .done(function (data) {
+    loadEntries(data);
+    calculateBmi();
+  });
 }
 
 function markDeletedEntries(data) {
@@ -172,7 +177,7 @@ function loadEntries(data) {
   var height = userdata.height;
 
   data.forEach(function (item, index) {
-    if (item.op != "create" || item.deleted)
+    if (item.op != "create" || (item.deleted && !showDeleted))
       return;
 
     if (newestEntry == null || item.timestamp > newestEntry.timestamp)
@@ -209,7 +214,7 @@ function loadEntries(data) {
     // add the entry to the charts
     if (item.weight != null) {
       item.bmi = getBMI(height, item.weight);
-      
+
       weightchartdata.push([
         timestamp,
         item.weight
@@ -269,9 +274,9 @@ function loadEntries(data) {
   var elapsed = newestEntry.timestamp - oldestEntry.timestamp;
   var elapsedDays = elapsed / (1000 * 60 * 60 * 24);
   elapsedDays = +(Math.round(elapsedDays + "e+2") + "e-2");
-  
+
   var spanclass = getChangeClass(oldestEntry.weight, newestEntry.weight);
-  var change = getChange(oldestEntry.weight, newestEntry.weight);  
+  var change = getChange(oldestEntry.weight, newestEntry.weight);
 
   var lostWeightPerDay = change / elapsedDays;
   lostWeightPerDay = +(Math.round(lostWeightPerDay + "e+2") + "e-2");
@@ -285,7 +290,7 @@ function loadEntries(data) {
 
   var oldestBodyFatCategory = getBodyFatCategory(userdata.gender, oldestEntry.body_fat);
   var newestBodyFatCategory = getBodyFatCategory(userdata.gender, newestEntry.body_fat);
-    
+
   spanclass = getChangeClass(oldestEntry.body_fat, newestEntry.body_fat);
   change = getChange(oldestEntry.body_fat, newestEntry.body_fat);
   $(".startbodyfat").text(oldestEntry.body_fat + "% - " + oldestBodyFatCategory.name + " (" + oldestBodyFatCategory.from + " - " + oldestBodyFatCategory.to + ")");
@@ -332,13 +337,13 @@ function loadEntries(data) {
   var bodyFatCategoryIndex = getBodyFatCategoryIndex(userdata.gender, newestEntry.body_fat);
   if(bodyFatCategoryIndex > 0) {
     nextBodyFatCategory = getBodyFatCategoryByIndex(userdata.gender, bodyFatCategoryIndex - 1);
-    
+
     var bodyFatDifference = newestEntry.body_fat - nextBodyFatCategory.to;
     bodyFatDifference = +(Math.round(bodyFatDifference + "e+2") + "e-2");
-    
+
     var bodyFatWeight = (bodyFatDifference / 100) * newestEntry.weight;
     bodyFatWeight = +(Math.round(bodyFatWeight + "e+2") + "e-2");
-    
+
     $("#goalbodyfat").html("Lose " + bodyFatDifference + "% body fat (" + bodyFatWeight + " lbs) to " + nextBodyFatCategory.to + "% - " + getCategoryElement(nextBodyFatCategory));
     var estimatedDays = bodyFatWeight / lostWeightPerDay;
     estimatedDays = +(Math.round(estimatedDays + "e+2") + "e-2");
@@ -349,16 +354,16 @@ function loadEntries(data) {
   var bmiCategoryIndex = getBmiCategoryIndex(newestEntry.bmi);
   if(bmiCategoryIndex > 0) {
     nextBmiCategory = bmiCategories[bmiCategoryIndex - 1];
-    
+
     var bmiDifference = newestEntry.bmi - nextBmiCategory.to;
     bmiDifference = +(Math.round(bmiDifference + "e+2") + "e-2");
-    
+
     var nextWeight = getWeight(userdata.height, nextBmiCategory.to);
     nextWeight = +(Math.round(nextWeight + "e+2") + "e-2");
-    
+
     var weightDifference = newestEntry.weight - nextWeight;
     weightDifference = +(Math.round(weightDifference + "e+2") + "e-2");
-    
+
     $("#goalbmi").html("Lose " + weightDifference + " lbs (" + bmiDifference + "kg/m&#x00B2;) to " + nextWeight + " lbs - " + getCategoryElement(nextBmiCategory));
     var estimatedDays = weightDifference / lostWeightPerDay;
     estimatedDays = +(Math.round(estimatedDays + "e+2") + "e-2");
