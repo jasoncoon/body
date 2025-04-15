@@ -83,27 +83,27 @@ var femaleBodyFatCategories = [
   { from: 32, to: 100, name: "Obese", class: "text-danger" },
 ];
 
-function getBodyFatCategory(gender, bodyfat) {
+function getBodyFatCategory(bodyType, bodyfat) {
   var array = maleBodyFatCategories;
-  if (gender != "Male") array = femaleBodyFatCategories;
+  if (bodyType != "Male") array = femaleBodyFatCategories;
 
   for (i = 0; i < array.length; i++) {
     if (bodyfat < array[i].to) return array[i];
   }
 }
 
-function getBodyFatCategoryIndex(gender, bodyfat) {
+function getBodyFatCategoryIndex(bodyType, bodyfat) {
   var array = maleBodyFatCategories;
-  if (gender != "Male") array = femaleBodyFatCategories;
+  if (bodyType != "Male") array = femaleBodyFatCategories;
 
   for (i = 0; i < array.length; i++) {
     if (bodyfat < array[i].to) return i;
   }
 }
 
-function getBodyFatCategoryByIndex(gender, index) {
+function getBodyFatCategoryByIndex(bodyType, index) {
   var array = maleBodyFatCategories;
-  if (gender != "Male") array = femaleBodyFatCategories;
+  if (bodyType != "Male") array = femaleBodyFatCategories;
 
   return array[index];
 }

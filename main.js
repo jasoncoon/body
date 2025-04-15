@@ -13,6 +13,14 @@ window.addEventListener("load", () => {
     loadCurrentFile();
   });
 
+  $("#bodyType").val(localStorage.getItem("bodyType"));
+
+  $("#bodyType").change((event) => {
+    localStorage.setItem("bodyType", event.target.value);
+    userdata.bodyType = event.target.value;
+    loadCurrentFile();
+  });
+
   loadCurrentFile();
 });
 
@@ -30,7 +38,7 @@ var bodyfat;
 
 const userdata = {
   height: 72,
-  gender: "Male",
+  bodyType: "Male",
 };
 
 function calculateBmi() {
@@ -150,11 +158,15 @@ function loadEntries(data) {
     if (newestEntry == null || item.timestamp > newestEntry.timestamp)
       newestEntry = item;
 
-    if (oldestEntry == null) oldestEntry = item;
+    if (oldestEntry == null) {
+      oldestEntry = item;
+      console.log({oldestEntry});
+    }
     
-    if (item.weight && (!oldestEntry.weight || item.weight > oldestEntry.weight)) {
+    if (item.weight && !Number.isNaN(item.weight) && (!oldestEntry.weight || Number.isNaN(oldestEntry.weight) ||  item.weight > oldestEntry.weight)) {
       oldestEntry.weight = item.weight;
       oldestEntry.bmi = getBMI(height, oldestEntry.weight);
+      console.log({oldestEntry});
     }
 
     if (item.timestamp && (!oldestEntry.timestamp || item.timestamp < oldestEntry.timestamp)) oldestEntry.timestamp = item.timestamp;
@@ -246,7 +258,7 @@ function loadEntries(data) {
       " lbs, lost " +
       change +
       " lbs in " +
-      elapsedDays +
+      elapsedDays.toLocaleString() +
       " days, or " +
       lostWeightPerDay +
       " lbs per day."
@@ -258,11 +270,11 @@ function loadEntries(data) {
   $(".weightchange").text(change + " lbs");
 
   var oldestBodyFatCategory = getBodyFatCategory(
-    userdata.gender,
+    userdata.bodyType,
     oldestEntry.body_fat
   );
   var newestBodyFatCategory = getBodyFatCategory(
-    userdata.gender,
+    userdata.bodyType,
     newestEntry.body_fat
   );
 
@@ -377,12 +389,12 @@ function loadEntries(data) {
   $(".waterchange").text(change + "%");
 
   var bodyFatCategoryIndex = getBodyFatCategoryIndex(
-    userdata.gender,
+    userdata.bodyType,
     newestEntry.body_fat
   );
   if (bodyFatCategoryIndex > 0) {
     nextBodyFatCategory = getBodyFatCategoryByIndex(
-      userdata.gender,
+      userdata.bodyType,
       bodyFatCategoryIndex - 1
     );
 
