@@ -12,19 +12,19 @@ var bmiCategories = [
   {
     from: 30,
     to: 35,
-    name: "Obese Class I (Moderately obese)",
+    name: "Moderately obese",
     class: "text-danger",
   },
   {
     from: 35,
     to: 40,
-    name: "Obese Class II (Severely obese)",
+    name: "Severely obese",
     class: "text-danger",
   },
   {
     from: 40,
     to: 99,
-    name: "Obese Class III (Very severely obese)",
+    name: "Very severely obese",
     class: "text-danger",
   },
 ];

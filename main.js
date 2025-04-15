@@ -66,7 +66,6 @@ function loadFile(file) {
       if (line.startsWith("Weight") || !line) continue;
       const [weight, body_fat, muscle_mass, water, bmi, bone_mass, timestamp] =
         line.split(",");
-      if (body_fat === "0%") continue;
       const entry = {
         weight: Number.parseFloat(weight),
         body_fat: Number.parseFloat(body_fat.slice(0, -1)),
@@ -138,27 +137,6 @@ function getChangeColorClass(oldest, newest) {
   return changeclass;
 }
 
-function getEntries() {
-  var start = 1000000000000;
-
-  var formData = {
-    auth_token: authtoken,
-    start: start,
-  };
-
-  $.ajax({
-    url: "https://api.weightgurus.com/v2/entry/list",
-    type: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-    data: formData,
-  }).done(function (data) {
-    loadEntries(data);
-    calculateBmi();
-  });
-}
-
 function loadEntries(data) {
   // sort the data from oldest to newest (required by highcharts)
   data.sort(compareEntriesByTimestampAsc);
@@ -172,8 +150,17 @@ function loadEntries(data) {
     if (newestEntry == null || item.timestamp > newestEntry.timestamp)
       newestEntry = item;
 
-    if (oldestEntry == null || item.timestamp < oldestEntry.timestamp)
-      oldestEntry = item;
+    if (oldestEntry == null) oldestEntry = item;
+    
+    if (item.weight && (!oldestEntry.weight || item.weight > oldestEntry.weight)) {
+      oldestEntry.weight = item.weight;
+      oldestEntry.bmi = getBMI(height, oldestEntry.weight);
+    }
+
+    if (item.timestamp && (!oldestEntry.timestamp || item.timestamp < oldestEntry.timestamp)) oldestEntry.timestamp = item.timestamp;
+    if (item.body_fat && (!oldestEntry.body_fat || item.body_fat > oldestEntry.body_fat)) oldestEntry.body_fat = item.body_fat;
+    if (item.muscle_mass && (!oldestEntry.muscle_mass || item.muscle_mass < oldestEntry.muscle_mass)) oldestEntry.muscle_mass = item.muscle_mass;
+    if (item.water && (!oldestEntry.water || item.water < oldestEntry.water)) oldestEntry.water = item.water;
 
     var timestamp = item.timestamp;
     var date = new Date(timestamp);
@@ -320,11 +307,12 @@ function loadEntries(data) {
   );
   $(".bodyfatchange").text(change + "%");
 
-  var oldestBmiCategory = getBmiCategory(oldestEntry.bmi);
+  var oldestBmiCategory = getBmiCategory(oldestEntry.bmi) ?? {};
   var newestBmiCategory = getBmiCategory(newestEntry.bmi);
 
   spanclass = getChangeClass(oldestEntry.bmi, newestEntry.bmi);
   change = getChange(oldestEntry.bmi, newestEntry.bmi);
+  console.log({oldestEntry});
   $(".startbmi").html(
     oldestEntry.bmi +
       " kg/m&#x00B2; - " +
@@ -429,7 +417,7 @@ function loadEntries(data) {
   }
 
   var bmiCategoryIndex = getBmiCategoryIndex(newestEntry.bmi);
-  if (bmiCategoryIndex > 0) {
+  if (bmiCategoryIndex > 3) {
     nextBmiCategory = bmiCategories[bmiCategoryIndex - 1];
 
     var bmiDifference = newestEntry.bmi - nextBmiCategory.to;
