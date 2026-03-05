@@ -160,13 +160,11 @@ function loadEntries(data) {
 
     if (oldestEntry == null) {
       oldestEntry = item;
-      console.log({oldestEntry});
     }
     
     if (item.weight && !Number.isNaN(item.weight) && (!oldestEntry.weight || Number.isNaN(oldestEntry.weight) ||  item.weight > oldestEntry.weight)) {
       oldestEntry.weight = item.weight;
-      oldestEntry.bmi = getBMI(height, oldestEntry.weight);
-      console.log({oldestEntry});
+      oldestEntry.bmi = getBMI(userdata.height, oldestEntry.weight);
     }
 
     if (item.timestamp && (!oldestEntry.timestamp || item.timestamp < oldestEntry.timestamp)) oldestEntry.timestamp = item.timestamp;
@@ -182,41 +180,41 @@ function loadEntries(data) {
     item.water = +(Math.round(item.water + "e+2") + "e-2");
 
     var bodyfat = null;
-    if (item.body_fat != null)
+    if (item.body_fat)
       bodyfat = item.body_fat.toLocaleString({
         style: "percent",
       });
 
     var musclemass = null;
-    if (item.muscle_mass != null)
+    if (item.muscle_mass)
       musclemass = item.muscle_mass.toLocaleString({
         style: "percent",
       });
 
     var water = null;
-    if (item.water != null)
+    if (item.water)
       water = item.water.toLocaleString({
         style: "percent",
       });
 
     // add the entry to the charts
-    if (item.weight != null) {
+    if (item.weight) {
       if (!item.bmi) {
-        item.bmi = getBMI(height, item.weight);
+        item.bmi = getBMI(userdata.height, item.weight);
       }
 
       weightchartdata.push([timestamp, item.weight]);
     }
 
-    if (item.body_fat != null)
+    if (item.body_fat)
       bodyfatchartdata.push([timestamp, item.body_fat]);
 
-    if (item.bmi != null) bmichartdata.push([timestamp, item.bmi]);
+    if (item.bmi) bmichartdata.push([timestamp, item.bmi]);
 
-    if (item.muscle_mass != null)
+    if (item.muscle_mass)
       musclechartdata.push([timestamp, item.muscle_mass]);
 
-    if (item.water != null) waterchartdata.push([timestamp, item.water]);
+    if (item.water) waterchartdata.push([timestamp, item.water]);
 
     // add the entry to the table
     $("#table > tbody:last-child").append(
@@ -324,7 +322,6 @@ function loadEntries(data) {
 
   spanclass = getChangeClass(oldestEntry.bmi, newestEntry.bmi);
   change = getChange(oldestEntry.bmi, newestEntry.bmi);
-  console.log({oldestEntry});
   $(".startbmi").html(
     oldestEntry.bmi +
       " kg/m&#x00B2; - " +
